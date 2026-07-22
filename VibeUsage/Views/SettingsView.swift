@@ -4,6 +4,7 @@ import ServiceManagement
 struct SettingsView: View {
     @Environment(AppState.self) private var appState
     @EnvironmentObject var updaterViewModel: UpdaterViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var apiKeyDisplay: String = ""
     @State private var autoStartEnabled: Bool = false
@@ -22,7 +23,7 @@ struct SettingsView: View {
                         HStack(spacing: 8) {
                             Text(apiKeyDisplay)
                                 .font(.system(.body, design: .monospaced))
-                                .foregroundStyle(Color(white: 0.5))
+                                .foregroundStyle(Theme.subtleText(colorScheme))
 
                             Button(isRelinking ? "等待确认…" : "重新链接") {
                                 relinkTask = Task { await relink() }
@@ -142,6 +143,16 @@ struct SettingsView: View {
 
             // Auto-start + general
             Section {
+                Picker("外观", selection: Binding(
+                    get: { appState.appearanceMode },
+                    set: { appState.appearanceMode = $0 }
+                )) {
+                    ForEach(AppearanceMode.allCases, id: \.self) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
                 Toggle("开机自启动", isOn: $autoStartEnabled)
                     .tint(.green)
                     .onChange(of: autoStartEnabled) { _, newValue in
@@ -156,7 +167,7 @@ struct SettingsView: View {
             } header: {
                 Text("通用")
             } footer: {
-                Text("关闭设置窗口后生效")
+                Text("外观跟随系统时使用系统设置；在 Dock 中显示与开机自启动关闭设置窗口后生效")
                     .font(.caption)
             }
 

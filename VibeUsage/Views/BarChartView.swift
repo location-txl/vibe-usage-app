@@ -56,6 +56,7 @@ private struct BarData: Identifiable, Equatable {
 
 struct BarChartView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.colorScheme) private var colorScheme
 
     private var isHourly: Bool {
         appState.timeRange.isHourly
@@ -181,7 +182,7 @@ struct BarChartView: View {
             HStack {
                 Text(isHourly ? "每小时趋势" : "每日趋势")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color(white: 0.63))
+                    .foregroundStyle(Theme.secondaryText(colorScheme))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 Spacer()
@@ -194,15 +195,15 @@ struct BarChartView: View {
                                 .minimumScaleFactor(0.8)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 4)
-                                .background(state.chartMode == mode ? Color(white: 0.28) : Color.clear)
-                                .foregroundStyle(state.chartMode == mode ? Color.white : Color(white: 0.5))
+                                .background(state.chartMode == mode ? Theme.selectedFill(colorScheme) : Color.clear)
+                                .foregroundStyle(state.chartMode == mode ? Theme.selectedText(colorScheme) : Theme.subtleText(colorScheme))
                                 .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 .padding(2)
-                .background(Color(white: 0.16))
+                .background(Theme.cardBorder(colorScheme))
                 .clipShape(Capsule())
                 .fixedSize(horizontal: true, vertical: false)
             }
@@ -226,11 +227,11 @@ struct BarChartView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity)
-        .background(Color(white: 0.09))
+        .background(Theme.cardBackground(colorScheme))
         .cornerRadius(4)
         .overlay(
             RoundedRectangle(cornerRadius: 4)
-                .stroke(Color(white: 0.16), lineWidth: 1)
+                .stroke(Theme.cardBorder(colorScheme), lineWidth: 1)
         )
     }
 
@@ -249,6 +250,7 @@ private struct ChartContent: View {
     private let chartAxisGap: CGFloat = 6
     private let xLabelWidth: CGFloat = 46
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var hoveredIndex: Int?
     @State private var scroll = ScrollWatcher()
 
@@ -275,13 +277,13 @@ private struct ChartContent: View {
                         }
                     }
                     .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(Color(white: 0.38))
+                    .foregroundStyle(Theme.tertiaryText(colorScheme))
                     .lineLimit(1)
                     .minimumScaleFactor(0.55)
                     Spacer()
                     Text("0")
                         .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(Color(white: 0.38))
+                        .foregroundStyle(Theme.tertiaryText(colorScheme))
                         .lineLimit(1)
                 }
                 .frame(width: yAxisWidth)
@@ -297,17 +299,17 @@ private struct ChartContent: View {
                                 let inputH = CGFloat(bar.input) / CGFloat(maxTotal) * 150
                                 let outputH = CGFloat(bar.output) / CGFloat(maxTotal) * 150
                                 let cachedH = CGFloat(bar.cached) / CGFloat(maxTotal) * 150
-                                // Output (top, white)
+                                // Output (top, primary)
                                 Rectangle()
-                                    .fill(Color.white.opacity(0.9))
+                                    .fill(Theme.chartPrimaryFill(colorScheme))
                                     .frame(height: outputH)
                                     .clipShape(UnevenRoundedRectangle(topLeadingRadius: 2, topTrailingRadius: 2))
-                                // Input (bottom, zinc)
+                                // Input (bottom, subtle)
                                 Rectangle()
-                                    .fill(Color(white: 0.5))
+                                    .fill(Theme.subtleText(colorScheme))
                                     .frame(height: inputH)
                                 Rectangle()
-                                    .fill(Color(white: 0.24))
+                                    .fill(Theme.tertiaryText(colorScheme).opacity(0.6))
                                     .frame(height: cachedH)
                             case .cost:
                                 let costH = CGFloat(bar.cost) / CGFloat(maxCost) * 150
@@ -384,7 +386,7 @@ private struct ChartContent: View {
                                 let bar = data[index]
                                 Text(isHourly ? Formatters.formatHourShort(bar.id) : Formatters.formatDateShort(bar.id))
                                     .font(.system(size: 11))
-                                    .foregroundStyle(Color(white: 0.5))
+                                    .foregroundStyle(Theme.subtleText(colorScheme))
                                     .lineLimit(1)
                                     .frame(width: xLabelWidth, alignment: .center)
                                     .position(
@@ -422,7 +424,7 @@ private struct ChartContent: View {
     private func tooltip(for bar: BarData) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(isHourly ? Formatters.formatHourShort(bar.id) : Formatters.formatDateShort(bar.id))
-                .foregroundStyle(.white)
+                .foregroundStyle(Theme.tooltipText(colorScheme))
                 .fontWeight(.medium)
 
             switch chartMode {
@@ -451,7 +453,7 @@ private struct ChartContent: View {
         }
         .font(.system(size: 11))
         .padding(8)
-        .background(Color.black)
+        .background(Theme.tooltipBackground(colorScheme))
         .cornerRadius(4)
         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(white: 0.2), lineWidth: 0.5))
         .shadow(color: .black.opacity(0.5), radius: 4, y: 2)

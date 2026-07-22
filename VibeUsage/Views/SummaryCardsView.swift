@@ -54,25 +54,30 @@ struct SummaryCardsView: View {
 private struct StatCard: View {
     let label: String
     let value: String
-    var color: Color = .white
+    var color: Color? = nil
+    @Environment(\.colorScheme) private var colorScheme
 
     // Reserve fixed line-box heights so all cards render at exactly the same height,
     // even when minimumScaleFactor shrinks the value glyphs in narrower columns.
     private let labelHeight: CGFloat = 14   // 12pt font
     private let valueHeight: CGFloat = 24   // 20pt font
 
+    private var resolvedColor: Color {
+        color ?? Theme.primaryText(colorScheme)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.system(size: 12))
-                .foregroundStyle(Color(white: 0.63))
+                .foregroundStyle(Theme.secondaryText(colorScheme))
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .minimumScaleFactor(0.85)
                 .frame(height: labelHeight, alignment: .leading)
             Text(value)
                 .font(.system(size: 20, weight: .bold, design: .monospaced))
-                .foregroundStyle(color)
+                .foregroundStyle(resolvedColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
                 .contentTransition(.numericText())
@@ -82,11 +87,11 @@ private struct StatCard: View {
         .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 11)
         .padding(.vertical, 13)
-        .background(Color(white: 0.09))
+        .background(Theme.cardBackground(colorScheme))
         .cornerRadius(4)
         .overlay(
             RoundedRectangle(cornerRadius: 4)
-                .stroke(Color(white: 0.16), lineWidth: 1)
+                .stroke(Theme.cardBorder(colorScheme), lineWidth: 1)
         )
     }
 }

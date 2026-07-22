@@ -122,6 +122,24 @@ final class MenuBarController: NSObject {
             name: NSWorkspace.didActivateApplicationNotification,
             object: nil
         )
+
+        // Re-apply NSAppearance on the popover panel whenever the user toggles
+        // the appearance preference. SwiftUI content is driven by
+        // PopoverView's .preferredColorScheme, but the AppKit layer (tooltips,
+        // scrollbars) needs panel.appearance to match.
+        appState.appearanceModeDidChange = { [weak self] in
+            self?.applyPanelAppearance()
+        }
+    }
+
+    private func applyPanelAppearance() {
+        let nsAppearance: NSAppearance?
+        switch appState.appearanceMode {
+        case .system: nsAppearance = nil
+        case .light: nsAppearance = NSAppearance(named: .aqua)
+        case .dark: nsAppearance = NSAppearance(named: .darkAqua)
+        }
+        panel?.appearance = nsAppearance
     }
 
     @objc private func handleAppActivation(_ note: Notification) {
@@ -327,6 +345,7 @@ final class MenuBarController: NSObject {
         }
 
         self.panel = panel
+        applyPanelAppearance()
         return panel
     }
 

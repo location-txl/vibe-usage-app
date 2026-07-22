@@ -27,6 +27,7 @@ private enum FilterDimension: CaseIterable {
 
 struct FilterTagsView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.colorScheme) private var colorScheme
     @State private var openFilter: FilterDimension?
     @State private var expandedModelFamilies: Set<String> = Set()
     private let filterGap: CGFloat = 8
@@ -129,10 +130,10 @@ struct FilterTagsView: View {
                 } label: {
                     Text(displayLabel(for: range))
                         .font(.system(size: 12, weight: isActive ? .semibold : .regular))
-                        .foregroundStyle(isActive ? Color.white : Color(white: 0.54))
+                        .foregroundStyle(isActive ? Theme.selectedText(colorScheme) : Theme.subtleText(colorScheme))
                         .frame(height: 24)
                         .padding(.horizontal, 9)
-                        .background(isActive ? Color(white: 0.20) : Color.clear)
+                        .background(isActive ? Theme.selectedFill(colorScheme) : Color.clear)
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
@@ -140,7 +141,7 @@ struct FilterTagsView: View {
             }
         }
         .padding(2)
-        .background(Color(white: 0.10))
+        .background(Theme.hoverFill(colorScheme))
         .clipShape(Capsule())
     }
 
@@ -160,7 +161,7 @@ struct FilterTagsView: View {
 
             Text("–")
                 .font(.system(size: 12))
-                .foregroundStyle(Color(white: 0.38))
+                .foregroundStyle(Theme.tertiaryText(colorScheme))
 
             DatePicker(
                 "",
@@ -193,9 +194,9 @@ struct FilterTagsView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
-        .background(Color(white: 0.08))
+        .background(Theme.surfaceElevated(colorScheme))
         .clipShape(RoundedRectangle(cornerRadius: 4))
-        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(white: 0.14), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.cardBorder(colorScheme), lineWidth: 1))
     }
 
     private func filterButton(for dimension: FilterDimension) -> some View {
@@ -214,20 +215,20 @@ struct FilterTagsView: View {
             HStack(spacing: 6) {
                 Image(systemName: dimension.icon)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(isActive || isOpen ? Color.white : Color(white: 0.58))
+                    .foregroundStyle(isActive || isOpen ? Theme.selectedText(colorScheme) : Theme.subtleText(colorScheme))
                     .frame(width: 13)
                     .layoutPriority(1)
 
                 Text(dimension.label)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(isActive || isOpen ? Color.white : Color(white: 0.66))
+                    .foregroundStyle(isActive || isOpen ? Theme.selectedText(colorScheme) : Theme.secondaryText(colorScheme))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                     .layoutPriority(2)
 
                 Text(summary)
                     .font(.system(size: 12))
-                    .foregroundStyle(isActive ? Color(white: 0.86) : Color(white: 0.42))
+                    .foregroundStyle(isActive ? Theme.primaryText(colorScheme) : Theme.tertiaryText(colorScheme))
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .minimumScaleFactor(0.75)
@@ -237,7 +238,7 @@ struct FilterTagsView: View {
 
                 Image(systemName: "chevron.down")
                     .font(.system(size: 8, weight: .bold))
-                    .foregroundStyle(Color(white: 0.38))
+                    .foregroundStyle(Theme.tertiaryText(colorScheme))
                     .rotationEffect(.degrees(isOpen ? 180 : 0))
                     .frame(width: 10)
                     .layoutPriority(1)
@@ -245,9 +246,9 @@ struct FilterTagsView: View {
             .padding(.horizontal, 9)
             .frame(minWidth: 0, maxWidth: .infinity)
             .frame(height: filterRowHeight)
-            .background(isActive || isOpen ? Color(white: 0.16) : Color(white: 0.09))
+            .background(isActive || isOpen ? Theme.cardBorder(colorScheme) : Theme.cardBackground(colorScheme))
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color(white: isActive || isOpen ? 0.26 : 0.15), lineWidth: 1))
+            .overlay(Capsule().stroke(Theme.cardBorder(colorScheme), lineWidth: 1))
             .opacity(enabled ? 1 : 0.45)
             .clipped()
         }
@@ -265,10 +266,10 @@ struct FilterTagsView: View {
             .frame(height: dropdownScrollHeight(for: dimension))
         }
         .padding(.vertical, 4)
-        .background(Color(white: 0.06))
+        .background(Theme.surfaceElevated(colorScheme))
         .clipShape(RoundedRectangle(cornerRadius: 4))
-        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(white: 0.18), lineWidth: 1))
-        .shadow(color: Color.black.opacity(0.35), radius: 12, x: 0, y: 8)
+        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.buttonBorder(colorScheme), lineWidth: 1))
+        .shadow(color: Theme.shadowColor(colorScheme), radius: 12, x: 0, y: 8)
     }
 
     private func dropdownX(for dimension: FilterDimension, in width: CGFloat, panelWidth: CGFloat) -> CGFloat {
@@ -380,7 +381,7 @@ struct FilterTagsView: View {
                         } label: {
                             Image(systemName: "chevron.down")
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(Color(white: 0.38))
+                                .foregroundStyle(Theme.tertiaryText(colorScheme))
                                 .rotationEffect(.degrees(isExpanded ? 180 : 0))
                                 .frame(width: 28, height: 28)
                         }
@@ -412,7 +413,7 @@ struct FilterTagsView: View {
                 checkbox(isSelected: isSelected, isMixed: isMixed)
                 Text(title)
                     .font(.system(size: 12))
-                    .foregroundStyle(isSelected || isMixed ? Color.white : Color(white: 0.62))
+                    .foregroundStyle(isSelected || isMixed ? Theme.primaryText(colorScheme) : Theme.secondaryText(colorScheme))
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
@@ -423,22 +424,22 @@ struct FilterTagsView: View {
         .padding(.horizontal, 10)
         .frame(height: 28)
         .frame(maxWidth: .infinity)
-        .background(Color(white: isSelected || isMixed ? 0.10 : 0.06))
+        .background(isSelected || isMixed ? Theme.hoverFill(colorScheme) : Theme.surfaceElevated(colorScheme))
     }
 
     private func checkbox(isSelected: Bool, isMixed: Bool = false) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 3)
-                .fill(isSelected || isMixed ? Color.white : Color.clear)
+                .fill(isSelected || isMixed ? Theme.primaryText(colorScheme) : Color.clear)
                 .frame(width: 13, height: 13)
-                .overlay(RoundedRectangle(cornerRadius: 3).stroke(Color(white: 0.38), lineWidth: isSelected || isMixed ? 0 : 1))
+                .overlay(RoundedRectangle(cornerRadius: 3).stroke(Theme.tertiaryText(colorScheme), lineWidth: isSelected || isMixed ? 0 : 1))
             if isSelected {
                 Image(systemName: "checkmark")
                     .font(.system(size: 8, weight: .bold))
-                    .foregroundStyle(Color.black)
+                    .foregroundStyle(Theme.cardBackground(colorScheme))
             } else if isMixed {
                 Rectangle()
-                    .fill(Color.black)
+                    .fill(Theme.cardBackground(colorScheme))
                     .frame(width: 7, height: 1.5)
             }
         }

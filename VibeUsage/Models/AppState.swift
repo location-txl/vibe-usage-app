@@ -1,6 +1,19 @@
 import Foundation
 import SwiftUI
 
+/// User-facing appearance preference persisted across launches.
+enum AppearanceMode: String, CaseIterable {
+    case system, light, dark
+
+    var label: String {
+        switch self {
+        case .system: "跟随系统"
+        case .light: "浅色"
+        case .dark: "深色"
+        }
+    }
+}
+
 /// Sync status for menu bar icon display
 enum SyncStatus: Equatable {
     case idle
@@ -192,6 +205,30 @@ final class AppState {
         }
     }
 
+    // MARK: - Appearance Pref
+    /// `.system` follows the OS; `.light` / `.dark` force the popover + settings
+    /// window to that scheme. Persisted in UserDefaults as the raw value.
+    var appearanceMode: AppearanceMode = .system {
+        didSet {
+            guard oldValue != appearanceMode else { return }
+            UserDefaults.standard.set(appearanceMode.rawValue, forKey: "appearanceMode")
+            appearanceModeDidChange?()
+        }
+    }
+
+    /// Set by `MenuBarController` so a toggle re-applies `panel.appearance`
+    /// (AppKit layer, e.g. tooltips) without recreating the panel.
+    var appearanceModeDidChange: (() -> Void)?
+
+    /// `nil` lets SwiftUI follow the system; non-nil forces that scheme.
+    var effectiveColorScheme: ColorScheme? {
+        switch appearanceMode {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
+    }
+
     // MARK: - Menu Bar Stats (matches current time range, no filters)
 
     /// Buckets within the active range's window. `.today` and `.oneDay` both
@@ -227,6 +264,7 @@ final class AppState {
         self.showCostInMenuBar = UserDefaults.standard.object(forKey: "showCostInMenuBar") as? Bool ?? true
         self.showTokensInMenuBar = UserDefaults.standard.object(forKey: "showTokensInMenuBar") as? Bool ?? false
         self.showInDock = UserDefaults.standard.object(forKey: "showInDock") as? Bool ?? true
+        self.appearanceMode = AppearanceMode(rawValue: UserDefaults.standard.string(forKey: "appearanceMode") ?? "") ?? .system
         let legacyRateLimitEnabled = UserDefaults.standard.object(forKey: "rateLimitMonitoringEnabled") as? Bool
         self.codexRateLimitEnabled = UserDefaults.standard.object(forKey: "codexRateLimitEnabled") as? Bool ?? legacyRateLimitEnabled ?? true
         self.claudeRateLimitEnabled = UserDefaults.standard.bool(forKey: "claudeRateLimitEnabled")

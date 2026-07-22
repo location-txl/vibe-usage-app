@@ -43,6 +43,7 @@ vibe-usage-app/                    # SwiftUI macOS menu bar app (SPM, Swift 6, m
 │   │   └── ActivationCoordinator.swift     # Centralizes NSApp.activationPolicy across popup + Settings + updates
 │   ├── Utils/
 │   │   ├── Formatters.swift       # Number, cost, date, time formatting
+│   │   ├── Theme.swift            # Semantic color tokens (per ColorScheme) for light/dark
 │   │   └── Log.swift              # Debug logging
 │   └── Resources/
 │       └── Assets.xcassets/       # App icon, menu bar icon
@@ -205,21 +206,29 @@ Token aggregation conventions (aligned with the web Vibe Usage page):
 
 ## Styling Conventions
 
-| Element | Color |
-|---------|-------|
-| Background | `Color(white: 0.04)` |
-| Card background | `Color(white: 0.09)` |
-| Borders | `Color(white: 0.16)` |
-| Primary text | `.white` |
-| Secondary text | `Color(white: 0.63)` |
-| Tertiary text | `Color(white: 0.38)` |
-| Cost accent | `Color(red: 0.2, green: 0.8, blue: 0.5)` |
-| Card corner radius | `4` |
-| Card border width | `1` |
+Colors are centralized in `VibeUsage/Utils/Theme.swift` as semantic tokens that resolve per `ColorScheme`. Never hardcode `Color(white:)` in views — read through `Theme.xxx(colorScheme)` so the dashboard adapts to light/dark. Each view declares `@Environment(\.colorScheme) private var colorScheme`. Brand accent colors (`Color(red:green:blue:)`) and system semantic colors (`.red`, `.green`, `.secondary`) are scheme-agnostic and stay inline.
+
+| Token | Dark | Light |
+|---------|-------|-------|
+| `Theme.background` | `Color(white: 0.04)` | `Color(white: 0.96)` |
+| `Theme.cardBackground` | `Color(white: 0.09)` | `Color.white` |
+| `Theme.cardBorder` / `Theme.divider` | `Color(white: 0.16)` | `Color(white: 0.86)` |
+| `Theme.primaryText` | `.white` | `Color(white: 0.08)` |
+| `Theme.secondaryText` | `Color(white: 0.63)` | `Color(white: 0.45)` |
+| `Theme.tertiaryText` | `Color(white: 0.38)` | `Color(white: 0.62)` |
+| `Theme.subtleText` | `Color(white: 0.5)` | `Color(white: 0.55)` |
+| `Theme.tooltipBackground` | `Color.black` | `Color(white: 0.10)` |
+| Cost accent | `Color(red: 0.2, green: 0.8, blue: 0.5)` (scheme-agnostic) | same |
+| Card corner radius | `4` | `4` |
+| Card border width | `1` | `1` |
 
 - Font sizes: 14pt bold titles, 11-12pt labels, 9-10pt secondary, monospaced for numbers
 - All UI text in Chinese
 - Window levels: Settings uses default `.normal` (so Sparkle update dialogs can sit above it); the popover panel uses `.popUpMenu` normally, lowered to `.normal` while Settings is visible
+
+### Appearance / Theme
+
+`AppearanceMode` (`AppState.swift`: `.system` / `.light` / `.dark`) persists the user's choice in `UserDefaults` under `appearanceMode`. `effectiveColorScheme` returns `nil` for `.system` (follow the OS) or the forced scheme. `PopoverView` applies it via `.preferredColorScheme(appState.effectiveColorScheme)`; since `AppState` is `@Observable`, a toggle drives the SwiftUI tree to re-resolve every `Theme.xxx(colorScheme)` automatically. `MenuBarController` sets `panel.appearance` (the AppKit layer — tooltips, scrollbars) via the `appearanceModeDidChange` callback so both layers stay in sync. The Settings 「通用」 section exposes a segmented `Picker` (跟随系统 / 浅色 / 深色). Menu-bar template icons (`isTemplate = true`) and the status-item `.primary` foreground adapt automatically and need no token.
 
 ## Release Process
 
